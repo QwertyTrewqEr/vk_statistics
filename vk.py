@@ -67,9 +67,9 @@ class VkParser:
 
 
 if __name__ == '__main__':
-    parser = VkParser('', '', 17721869, 17721869)
+    parser = VkParser('', '', 52962734, 52962735)
     print parser.get_personal_info()
-    parser.get_user_photos(17721869)
-    parser.get_user_comments(17721869, 100)
+    parser.get_user_photos(52962735)
+    parser.get_user_comments(52962735, 100)
     # 17721869
     # 52962735
