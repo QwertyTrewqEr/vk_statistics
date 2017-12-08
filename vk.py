@@ -135,7 +135,19 @@ class VkParser:
                 'friends.get',  # Метод
                 key='user_id',  # Изменяющийся параметр
                 values=self.ids,
-                # Параметры, которые будут в каждом запросе
                 default_values={'fields': 'photo'}
             )
         return friends.result
+
+    def get_user_subscriptions(self):
+        subscriptions = {}
+        with vk_api.VkRequestsPool(self.vk_session) as pool:
+            resp = pool.method_one_param(
+                'users.getSubscriptions',
+                key='user_id',  # Изменяющийся параметр
+                values=self.ids
+            )
+        for id, sub in resp.result.iteritems():
+            if int(sub[u'groups'][u'count']) > 0:
+                subscriptions[id]=sub[u'groups'][u'items']
+        return subscriptions
