@@ -8,7 +8,7 @@ import os
 
 class VkParser:
     def __init__(self, login, password, ids):
-        self.vk_session = vk_api.VkApi(login, password)
+        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442)
         try:
             self.vk_session.auth()
         except vk_api.AuthError as error_msg:
