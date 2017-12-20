@@ -8,7 +8,7 @@ import os
 
 class VkParser:
     def __init__(self, login, password, ids):
-        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442, api_version=5.69)
+        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442, api_version='5.69')
         try:
             self.vk_session.auth()
         except vk_api.AuthError as error_msg:
@@ -44,8 +44,8 @@ class VkParser:
     def get_personal_info(self):
         ids = self.ids
         result = {}
-        friendsRequest = self.vk.users.get(user_ids=ids, fields=[u'counters'])
-        info = self.vk.users.get(user_ids=ids, fields=[ 'sex', 'bdate', 'city', 'country',
+        friendsRequest = self.vk.users.get(user_ids=str(ids), fields=[u'counters'])
+        info = self.vk.users.get(user_ids=str(ids), fields=[ 'sex', 'bdate', 'city', 'country',
                                                        'home_town', 'has_photo', 'photo_50',
                                                        'photo_100', 'photo_200_orig', 'photo_200',
                                                        'photo_400_orig', 'photo_max', 'photo_max_orig',
@@ -54,7 +54,7 @@ class VkParser:
                                                        'schools', 'status', 'last_seen',
                                                        'followers_count', 'common_count', 'occupation',
                                                        'nickname', 'relatives', 'relation',
-                                                       'personal', 'connections', 'counters',
+                                                       'personal', 'connections',
                                                        'music', 'books', 'games',
                                                        'can_see_audio', 'career'])
         for i in range(len(info)):
