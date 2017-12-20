@@ -8,7 +8,7 @@ import os
 
 class VkParser:
     def __init__(self, login, password, ids):
-        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442)
+        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442, api_version=5.69)
         try:
             self.vk_session.auth()
         except vk_api.AuthError as error_msg:
@@ -45,8 +45,7 @@ class VkParser:
         ids = self.ids
         result = {}
         friendsRequest = self.vk.users.get(user_ids=ids, fields=[u'counters'])
-        info = self.vk.users.get(user_ids=ids, fields=['photo_id', 'verified', 'sex',
-                                                       'bdate', 'city', 'country',
+        info = self.vk.users.get(user_ids=ids, fields=[ 'sex', 'bdate', 'city', 'country',
                                                        'home_town', 'has_photo', 'photo_50',
                                                        'photo_100', 'photo_200_orig', 'photo_200',
                                                        'photo_400_orig', 'photo_max', 'photo_max_orig',
@@ -56,18 +55,15 @@ class VkParser:
                                                        'followers_count', 'common_count', 'occupation',
                                                        'nickname', 'relatives', 'relation',
                                                        'personal', 'connections', 'counters',
-                                                       'wall_comments', 'activities', 'interests',
-                                                       'music', 'movies', 'tv',
-                                                       'books', 'games', 'about',
-                                                       'quotes', 'can_post', 'can_see_all_posts',
-                                                       'can_see_audio', 'career', 'military'])
+                                                       'music', 'books', 'games',
+                                                       'can_see_audio', 'career'])
         for i in range(len(info)):
             result[info[i]['id']] = {}
             result[info[i]['id']]['name'] = info[i][u'first_name']
-            result[info[i]['id']]['sirname'] = info[i][u'last_name']
+            result[info[i]['id']]['surname'] = info[i][u'last_name']
             bdate = None
-            result[info[i]['id']]['age'] = None
-            result[info[i]['id']]['friends'] = None
+            result[info[i]['id']]['age'] = 0
+            result[info[i]['id']]['friends'] = 0
             if u'counters' in friendsRequest[i]:
                 result[info[i]['id']]['friends'] = friendsRequest[i][u'counters'][u'friends']
             if u'bdate' in info[i]:
