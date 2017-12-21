@@ -8,7 +8,7 @@ import os
 
 class VkParser:
     def __init__(self, login, password, ids):
-        self.vk_session = vk_api.VkApi(login=login, password=password)#, app_id=6305442, api_version='5.69')
+        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442, api_version='5.69')
         try:
             self.vk_session.auth()
         except vk_api.AuthError as error_msg:
@@ -44,15 +44,10 @@ class VkParser:
     def get_personal_info(self):
         ids = self.ids
         result = {}
-        friendsRequest = self.vk.users.get(user_ids=str(ids), fields=[u'counters'])
-        info = self.vk.users.get(user_ids='52962951', fields=[u"sex", u"bdate", u"city", u"country"])#,
-                                                            # u'home_town', u'domain', u'has_mobile',
-                                                            # u'education', u'universities',
-                                                            # u'schools', u'status', u'last_seen',
-                                                            # u'followers_count', u'common_count', u'occupation',
-                                                            # u'relation', u'personal', u'connections',
-                                                            # u'music', u'books', u'games',
-                                                            # u'career']))
+        info = self.vk.users.get(user_ids=str(ids), fields='''sex, bdate, city, country,
+                                                           home_town,domain,has_mobile, education,universities, schools,status,
+                                                           last_seen, followers_count,common_count,occupation, relation,personal,connections,
+                                                            music,books,games, career, counters''')
         for i in range(len(info)):
             result[info[i]['id']] = {}
             result[info[i]['id']]['name'] = info[i][u'first_name']
@@ -60,13 +55,15 @@ class VkParser:
             result[info[i]['id']]['sex'] = 'None'
             result[info[i]['id']]['age'] = 0
             result[info[i]['id']]['friends'] = 0
-            if u'counters' in friendsRequest[i]:
-                result[info[i]['id']]['friends'] = friendsRequest[i][u'counters'][u'friends']
+            if u'counters' in info[i]:
+                result[info[i]['id']]['friends'] = info[i][u'counters'][u'friends']
             if u'bdate' in info[i]:
                 bdate = info[i][u'bdate']
                 result[info[i]['id']]['age'] = re.findall(r'[0-9]{4}', bdate)
-                if type(result[info[i]['id']]['age']) is list:
+                if (type(result[info[i]['id']]['age']) is list) and len(result[info[i]['id']]['age']) > 0:
                     result[info[i]['id']]['age'] = 2017 - int(result[info[i]['id']]['age'][0])
+                else:
+                    result[info[i]['id']]['age'] = 0
             if info[i][u'sex'] == 1:
                 result[info[i]['id']]['sex'] = 'female'
             elif info[i][u'sex'] == 2:
@@ -137,6 +134,21 @@ class VkParser:
                 default_values={'fields': 'photo'}
             )
         return friends.result
+
+    def get_group_members(self, group_ids, offset=0):
+        members = []
+        with vk_api.VkRequestsPool(self.vk_session) as pool:
+            resp = pool.method_one_param(
+                'groups.getMembers',
+                key='group_id',  # Изменяющийся параметр
+                values=group_ids,
+                default_values={'offset': offset}
+            )
+        for id, arr in resp.result.iteritems():
+            if arr[u'count'] > 0:
+                items = arr[u'items']
+                members = members + items
+        return members
 
     def get_user_subscriptions(self):
         subscriptions = {}

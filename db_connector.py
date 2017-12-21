@@ -17,10 +17,14 @@ class Connector:
         for id, user in users.iteritems():
             print id
             if (len(user['name']) * len(user['surname'])):
+                photo = 0
+                if id in photos:
+                    photo = photos[id]
                 User.get_or_create(
                     uid=int(id),
                     username=(user['name'] + ' ' + user['surname']).encode('utf-8'),
                     age=user['age'],
                     friends_count=user['friends'],
+                    photos_count=photo,
                     sex=user['sex'],
                 )
