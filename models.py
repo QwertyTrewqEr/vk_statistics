@@ -15,5 +15,5 @@ class User(MySQLModel):
     age = IntegerField(default=0)
     friends_count = IntegerField(default=0)
     photos_count = IntegerField(default=0)
-
+    sex = CharField(max_length=6, default='None')
 

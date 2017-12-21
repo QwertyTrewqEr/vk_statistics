@@ -8,7 +8,7 @@ import os
 
 class VkParser:
     def __init__(self, login, password, ids):
-        self.vk_session = vk_api.VkApi(login=login, password=password, app_id=6305442, api_version='5.69')
+        self.vk_session = vk_api.VkApi(login=login, password=password)#, app_id=6305442, api_version='5.69')
         try:
             self.vk_session.auth()
         except vk_api.AuthError as error_msg:
@@ -45,23 +45,19 @@ class VkParser:
         ids = self.ids
         result = {}
         friendsRequest = self.vk.users.get(user_ids=str(ids), fields=[u'counters'])
-        info = self.vk.users.get(user_ids=str(ids), fields=[ 'sex', 'bdate', 'city', 'country',
-                                                       'home_town', 'has_photo', 'photo_50',
-                                                       'photo_100', 'photo_200_orig', 'photo_200',
-                                                       'photo_400_orig', 'photo_max', 'photo_max_orig',
-                                                       'online, domain', 'has_mobile', 'contacts',
-                                                       'site', 'education', 'universities',
-                                                       'schools', 'status', 'last_seen',
-                                                       'followers_count', 'common_count', 'occupation',
-                                                       'nickname', 'relatives', 'relation',
-                                                       'personal', 'connections',
-                                                       'music', 'books', 'games',
-                                                       'can_see_audio', 'career'])
+        info = self.vk.users.get(user_ids='52962951', fields=[u"sex", u"bdate", u"city", u"country"])#,
+                                                            # u'home_town', u'domain', u'has_mobile',
+                                                            # u'education', u'universities',
+                                                            # u'schools', u'status', u'last_seen',
+                                                            # u'followers_count', u'common_count', u'occupation',
+                                                            # u'relation', u'personal', u'connections',
+                                                            # u'music', u'books', u'games',
+                                                            # u'career']))
         for i in range(len(info)):
             result[info[i]['id']] = {}
             result[info[i]['id']]['name'] = info[i][u'first_name']
             result[info[i]['id']]['surname'] = info[i][u'last_name']
-            bdate = None
+            result[info[i]['id']]['sex'] = 'None'
             result[info[i]['id']]['age'] = 0
             result[info[i]['id']]['friends'] = 0
             if u'counters' in friendsRequest[i]:
@@ -71,6 +67,13 @@ class VkParser:
                 result[info[i]['id']]['age'] = re.findall(r'[0-9]{4}', bdate)
                 if type(result[info[i]['id']]['age']) is list:
                     result[info[i]['id']]['age'] = 2017 - int(result[info[i]['id']]['age'][0])
+            if info[i][u'sex'] == 1:
+                result[info[i]['id']]['sex'] = 'female'
+            elif info[i][u'sex'] == 2:
+                result[info[i]['id']]['sex'] = 'male'
+            else:
+                result[info[i]['id']]['sex'] = 'None'
+
         return result
 
     # if count=True, method returns photos count
@@ -145,5 +148,5 @@ class VkParser:
             )
         for id, sub in resp.result.iteritems():
             if int(sub[u'groups'][u'count']) > 0:
-                subscriptions[id]=sub[u'groups'][u'items']
+                subscriptions[id] = sub[u'groups'][u'items']
         return subscriptions

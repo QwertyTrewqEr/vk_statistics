@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from models import *
 
+
 class Connector:
     def __init__(self, user='root'):
         mysql_db.connect()
@@ -8,16 +9,18 @@ class Connector:
             User.create_table()
         except:
             pass
+
     def __del__(self):
         print "Connector closed"
 
     def add_users(self, users, photos=None, music=None):
         for id, user in users.iteritems():
             print id
-            if (len(user['name'])*len(user['surname'])):
+            if (len(user['name']) * len(user['surname'])):
                 User.get_or_create(
-                                       uid=int(id),
-                                       username=(user['name']+' '+user['surname']).encode('utf-8'),
-                                       age=user['age'],
-                                       friends_count=user['friends']
-                                   )
+                    uid=int(id),
+                    username=(user['name'] + ' ' + user['surname']).encode('utf-8'),
+                    age=user['age'],
+                    friends_count=user['friends'],
+                    sex=user['sex'],
+                )
