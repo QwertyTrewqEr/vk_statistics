@@ -41,8 +41,11 @@ class VkParser:
                     checked[id] = 2017 - int(checked[id][0])
         return [k for k, v in checked.items() if (v >= age_start) and (v <= age_end)]
 
-    def get_personal_info(self):
+    def get_personal_info(self, custom_ids=None):
         ids = self.ids
+        if custom_ids is not None:
+            ids = custom_ids
+
         result = {}
         info = self.vk.users.get(user_ids=str(ids), fields='''sex, bdate, city, country,
                                                            home_town,domain,has_mobile, education,universities, schools,status,
@@ -52,9 +55,11 @@ class VkParser:
             result[info[i]['id']] = {}
             result[info[i]['id']]['name'] = info[i][u'first_name']
             result[info[i]['id']]['surname'] = info[i][u'last_name']
-            result[info[i]['id']]['sex'] = 'None'
+            result[info[i]['id']]['sex'] = ''
             result[info[i]['id']]['age'] = 0
             result[info[i]['id']]['friends'] = 0
+            result[info[i]['id']]['career'] = ''
+            result[info[i]['id']]['university'] = ''
             if u'counters' in info[i]:
                 result[info[i]['id']]['friends'] = info[i][u'counters'][u'friends']
             if u'bdate' in info[i]:
@@ -64,24 +69,33 @@ class VkParser:
                     result[info[i]['id']]['age'] = 2017 - int(result[info[i]['id']]['age'][0])
                 else:
                     result[info[i]['id']]['age'] = 0
+            if (u'career' in info[i]) and (u'company' in info[i][u'career']):
+                result[info[i]['id']]['career'] = info[i][u'career'][u'company']
+            if (u'universities' in info[i]) and (len(info[i][u'universities'])>0):
+                for univer in info[i][u'universities']:
+                    if u'name' in univer:
+                        result[info[i]['id']]['university'] += univer[u'name']
+                        result[info[i]['id']]['university'] += ', '
             if info[i][u'sex'] == 1:
                 result[info[i]['id']]['sex'] = 'female'
             elif info[i][u'sex'] == 2:
                 result[info[i]['id']]['sex'] = 'male'
             else:
-                result[info[i]['id']]['sex'] = 'None'
+                result[info[i]['id']]['sex'] = ''
 
         return result
 
     # if count=True, method returns photos count
-    def get_user_photos(self, count=False):
-        # self.vk.photos.getAll(owner_id=id)
+    def get_user_photos(self, count=False, custom_ids=None):
+        ids = self.ids
+        if custom_ids is not None:
+            ids = custom_ids
         result = {}
         with vk_api.VkRequestsPool(self.vk_session) as pool:
             resp = pool.method_one_param(
                 'photos.getAll',
                 key='owner_id',
-                values=self.ids
+                values=ids
             )
         for id, photos in resp.result.iteritems():
             counter = 0
@@ -137,26 +151,36 @@ class VkParser:
 
     def get_group_members(self, group_ids, offset=0):
         members = []
-        with vk_api.VkRequestsPool(self.vk_session) as pool:
-            resp = pool.method_one_param(
-                'groups.getMembers',
-                key='group_id',  # Изменяющийся параметр
-                values=group_ids,
-                default_values={'offset': offset}
-            )
-        for id, arr in resp.result.iteritems():
-            if arr[u'count'] > 0:
-                items = arr[u'items']
-                members = members + items
+        while True:
+            with vk_api.VkRequestsPool(self.vk_session) as pool:
+                resp = pool.method_one_param(
+                    'groups.getMembers',
+                    key='group_id',  # Изменяющийся параметр
+                    values=group_ids,
+                    default_values={'offset': offset}
+                )
+            group_ids = []
+            offset += 1000
+            for id, arr in resp.result.iteritems():
+                if arr[u'count'] > 0:
+                    items = arr[u'items']
+                    members = list(set(members + items))
+                    if (arr[u'count'] - offset > 0):
+                        group_ids.append(id)
+            if len(group_ids) == 0:
+                break;
         return members
 
-    def get_user_subscriptions(self):
+    def get_user_subscriptions(self, custom_ids=None):
         subscriptions = {}
+        ids = self.ids
+        if custom_ids is not None:
+            ids = custom_ids
         with vk_api.VkRequestsPool(self.vk_session) as pool:
             resp = pool.method_one_param(
                 'users.getSubscriptions',
                 key='user_id',  # Изменяющийся параметр
-                values=self.ids
+                values=ids
             )
         for id, sub in resp.result.iteritems():
             if int(sub[u'groups'][u'count']) > 0:

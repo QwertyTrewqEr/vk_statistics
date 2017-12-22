@@ -7,6 +7,8 @@ class Connector:
         mysql_db.connect()
         try:
             User.create_table()
+            Group.create_table()
+            Subscribtions.create_table()
         except:
             pass
 
@@ -20,11 +22,33 @@ class Connector:
                 photo = 0
                 if id in photos:
                     photo = photos[id]
-                User.get_or_create(
-                    uid=int(id),
-                    username=(user['name'] + ' ' + user['surname']).encode('utf-8'),
-                    age=user['age'],
-                    friends_count=user['friends'],
-                    photos_count=photo,
-                    sex=user['sex'],
+                try:
+                    User.get_or_create(
+                        uid=int(id),
+                        username=(user['name'] + ' ' + user['surname']).encode('utf-8'),
+                        age=user['age'],
+                        friends_count=user['friends'],
+                        photos_count=photo,
+                        sex=user['sex'],
+                        university=user['university'],
+                        career=user['career'],
+                    )
+                except:
+                    print 'error adding uid' + str(id)
+        print 'ended writing users to database'
+
+    def add_groups(self, data):
+        print 'started writing groups to database'
+        for user, groups in data.iteritems():
+            for group in groups:
+                Group.get_or_create(
+                    gid=int(group)
                 )
+                us = User.get_or_create(uid=int(user))
+                if type(us) == tuple:
+                    us = us[0]
+                Subscribtions.get_or_create(
+                    user=us,
+                    group=Group.get(gid=int(group))
+                )
+        print 'ended writing groups to database'
