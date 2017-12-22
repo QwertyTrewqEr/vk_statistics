@@ -58,7 +58,7 @@ class VkParser:
             result[info[i]['id']]['sex'] = ''
             result[info[i]['id']]['age'] = 0
             result[info[i]['id']]['friends'] = 0
-            result[info[i]['id']]['career'] = ''
+            result[info[i]['id']]['occupation'] = ''
             result[info[i]['id']]['university'] = ''
             if u'counters' in info[i]:
                 result[info[i]['id']]['friends'] = info[i][u'counters'][u'friends']
@@ -69,8 +69,8 @@ class VkParser:
                     result[info[i]['id']]['age'] = 2017 - int(result[info[i]['id']]['age'][0])
                 else:
                     result[info[i]['id']]['age'] = 0
-            if (u'career' in info[i]) and (u'company' in info[i][u'career']):
-                result[info[i]['id']]['career'] = info[i][u'career'][u'company']
+            if (u'occupation' in info[i]) and (u'name' in info[i][u'occupation']):
+                result[info[i]['id']]['occupation'] = info[i][u'occupation'][u'name']
             if (u'universities' in info[i]) and (len(info[i][u'universities'])>0):
                 for univer in info[i][u'universities']:
                     if u'name' in univer:

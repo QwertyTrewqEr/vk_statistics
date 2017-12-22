@@ -19,7 +19,7 @@ class User(MySQLModel):
     photos_count = IntegerField(default=0)
     sex = CharField(max_length=6, default='')
     university = CharField(max_length=200, default='')
-    career = CharField(max_length=200, default='')
+    occupation = CharField(max_length=200, default='')
 
 
 class Group(MySQLModel):

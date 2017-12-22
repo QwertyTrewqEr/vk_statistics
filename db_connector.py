@@ -31,7 +31,7 @@ class Connector:
                         photos_count=photo,
                         sex=user['sex'],
                         university=user['university'],
-                        career=user['career'],
+                        occupation=user['occupation'],
                     )
                 except:
                     print 'error adding uid' + str(id)

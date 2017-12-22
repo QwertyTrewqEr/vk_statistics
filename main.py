@@ -18,8 +18,8 @@ def worker(parser, connector, ids):
 
 
 if __name__ == '__main__':
-    group_ids = ['spmi1773', 'podslushano_gornii', 'mining__anon', 'mjkvdsnfivritevnwin', 'podgon_pogon',
-                 'studenthelp89046411462', 'za4etka_spb']  # mining_abiturs
+    group_ids = ['podgon_pogon']#, 'mining__anon', 'spmi1773', 'podslushano_gornii', 'mjkvdsnfivritevnwin',
+                 #'studenthelp89046411462', 'za4etka_spb']  # mining_abiturs
 
     parser = VkParser(config['login'], config['password'], range(52962950, 52962952))
 
